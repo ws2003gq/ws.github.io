@@ -64,6 +64,122 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-test2" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/06/16/test2/" class="article-date">
+  <time datetime="2017-06-16T02:48:49.000Z" itemprop="datePublished">2017-06-16</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/06/16/test2/">test2</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>#场景电台需求规格说明书[SRS]</p>
+<p>##1.需求描述</p>
+<h3 style="z-index:auto;"><b>场景电台描述</b></h3>
+
+<ul><br>    <li>头部频道标题根据每日不同时段显示不同（建议服务器返回）</li><br>    <li>上半页展示4个「当前场景」，由服务器返回</li><br>    <li>最后一个在符合条件的情况下为天气电台，规则见下方</li><br>    <li>底部「全部电台」，按照服务器返回「分类 - 列表」的形式呈现，服务端可随时调整</li><br>    <li>每个电台都包含了中文名、英文名、背景图（只是出现在当前推荐时才会呈现该图）；图片保存在服务器</li><br>    <li>进入场景电台时，判断是否有当前正在播放？如有，则使用icon标识</li><br></ul>
+
+<h3 style="z-index:auto;"><b>「当前场景」规则说明：</b></h3>
+
+<ul><br>    <li>仅基于当前的时间（天气电台还需要地点）</li><br>    <li>由服务端根据当前时间判断当前场景</li><br>    <li>具体判断规则，由产品向服务端提供</li><br></ul>
+
+<h3 style="margin-top: 30px; z-index: auto;"><b>「天气场景」规则说明：</b></h3>
+
+<ul><br>    <li>天气电台展示，需满足以下3个条件（否则不展示天气电台）：<br>    <ul><br>        <li>成功获取用户所在区县+天气数据</li><br>        <li>当前时间不属于20:00-08:00区间</li><br>        <li>获取到的天气属于小雨、中雨、大雨、雷阵雨、小雪、中雪、大雪、晴、阴等枚举数据时，才展示（该集合需产品根据天气API的枚举来进行选取）</li><br>    </ul><br>    </li><br></ul>
+
+<h3 style="margin-top: 30px; z-index: auto;"><b>场景电台在客户端播放器形式：</b></h3>
+
+<ul><br>    <li>进入场景电台界面，必须点击一个场景，才可开始播放</li><br>    <li>点击后展开全屏电台播放器，并自动播放此电台</li><br>    <li>正在播放时，播放中场景有特殊icon标识，点击此场景则暂停播放（点击其他场景切换播放）</li><br>    <li>关于播放列表规则：<br>    <ol><br>        <li>开始播放时，一次性从该场景全部歌曲中随机取50首并顺序播放</li><br>        <li>参考私人FM，点开当前播放列表后，不显示歌单，仅展示播放历史</li><br>        <li>当前场景50首歌播放完毕（或者播放最后一首）时，重复本规则1。</li><br>    </ol><br>    </li><br></ul>
+
+<p>场景电台包含如下接口：<br>|接口名|接口描述|<br>|–|–|<br>|/v1.0/content/indexscene.do|获取场景电台信息-业务页面|<br>|/v1.0/content/indexscenedetails.do|获取单个场景电台歌单信息|</p>
+<p>##2. 需求描述</p>
+<p>###2.1 获取场景电台信息-业务页面        </p>
+<p>####2.1.1 需求描述<br>通过用户首次进入app 乐库》推荐》场景电台》进入场景电台页面<br>场景电台页面本身为一个栏目，</p>
+<ul>
+<li>上半页的场景为当前场景和天气场景，通过获取电台接口(内容组件)</li>
+<li>下半页的场景列表为内容（通过querycontentbyid去获取）(内容组件)</li>
+<li>最后拼接后给前端返回</li>
+<li>存储结构与栏目一致，方便刷新统一管理<br>场景列表需要缓存</li>
+</ul>
+<p>####2.1.2 流程分析<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">Client-&gt;MIGU2.0: indexscene.do</div><div class="line">MIGU2.0-&gt;MIGU2.0: 获取下半页\n querycontentbyid</div><div class="line">MIGU2.0-&gt;content: 获取上半页</div><div class="line">content--&gt;MIGU2.0: 返回</div><div class="line">Note right of MIGU2.0: 根据当前时间\n过滤上半页返回信息</div><div class="line">Note left of MIGU2.0:拼接返回结果</div><div class="line">MIGU2.0--&gt;Client:</div></pre></td></tr></table></figure></p>
+<p>####2.1.3 内部实现逻辑（流程图）<br>略</p>
+<p>####2.1.4 接口设计<br>Req:<br>|参数名称|说明|是否必须|备注|<br>|–|–|–|–|<br>|weather|天气信息|是|此处需要<strong>前端</strong>给出天气的枚举列表|<br>Rep:<br>|参数名称|说明|是否必须|备注|<br>|–|–|–|–|<br>|code|返回码|是|000000|<br>|info|返回描述|是|成功|<br>|now|ColumnInfo|是|当前场景|<br>|all|ColumnInfo|是|全部场景|</p>
+<p>####2.1.5 表结构设计<br>将场景电台的栏目插入配置表<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line">INSERT INTO `music`.`t_migu_columnid_url` (</div><div class="line">	`columnid`,</div><div class="line">	`columnname`,</div><div class="line">	`servicepath`,</div><div class="line">	`ua`,</div><div class="line">	`version`,</div><div class="line">	`test`,</div><div class="line">	`status`,</div><div class="line">	`inserttime`</div><div class="line">)</div><div class="line">VALUES</div><div class="line">	(</div><div class="line">		&apos;xxxxx&apos;,</div><div class="line">		&apos;场景电台&apos;,</div><div class="line">		&apos;/v1.0/content/indexscene.do&apos;,</div><div class="line">		&apos;Android_migu&apos;,</div><div class="line">		&apos;1.0&apos;,</div><div class="line">		&apos;01&apos;,</div><div class="line">		&apos;1&apos;,</div><div class="line">		&apos;2017-5-25 16:56:54&apos;</div><div class="line">	);</div><div class="line"></div><div class="line">INSERT INTO `music`.`t_migu_columnid_url` (</div><div class="line">	`columnid`,</div><div class="line">	`columnname`,</div><div class="line">	`servicepath`,</div><div class="line">	`ua`,</div><div class="line">	`version`,</div><div class="line">	`test`,</div><div class="line">	`status`,</div><div class="line">	`inserttime`</div><div class="line">)</div><div class="line">VALUES</div><div class="line">	(</div><div class="line">		&apos;xxxxx&apos;,</div><div class="line">		&apos;场景电台&apos;,</div><div class="line">		&apos;/v1.0/content/indexscene.do&apos;,</div><div class="line">		&apos;Ios_migu&apos;,</div><div class="line">		&apos;1.0&apos;,</div><div class="line">		&apos;01&apos;,</div><div class="line">		&apos;1&apos;,</div><div class="line">		&apos;2017-5-25 16:56:54&apos;</div><div class="line">	);</div></pre></td></tr></table></figure></p>
+<p>创建tag表用来枚举天气的类型<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">CREATE TABLE `t_migu_tag` (</div><div class="line">`columnid`  int(20) NOT NULL COMMENT &apos;栏目id&apos; ,</div><div class="line">`tag`  varchar(255) NOT NULL COMMENT &apos;tag的描述&apos; ,</div><div class="line">`ua`  varchar(255) NOT NULL COMMENT &apos;ua&apos; ,</div><div class="line">`test`  varchar(2) NOT NULL ,</div><div class="line">PRIMARY KEY (`columnid`)</div><div class="line">);</div></pre></td></tr></table></figure></p>
+<p>####2.1.6 测试要点<br>1.对应的时间段返回对应的当前场景。<br>2.对应的天气返回对应的天气场景。<br>3.在限定时间段(20:00到次日8:00)内不返回天气场景。<br>4.不同channel 不同省份信息，test=01以及其他,cities.</p>
+<p>####2.1.7 性能测试</p>
+<p>###2.2 获取单个场景电台歌单信息</p>
+<p>####2.2.1 需求描述<br>点击场景电台进入场景电台的播放页面，返回一个歌单类型的栏目，<br>需要将其中随机取50首歌曲发出。</p>
+<p>####2.2.2 流程分析<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">Client-&gt;MIGU2.0: indexscenedetails.do</div><div class="line">MIGU2.0-&gt;MIGU2.0: 获取场景电台的歌单\n querycontentbyid</div><div class="line">Note over MIGU2.0: 将原始数据取出后\n拼出随机50首填回</div><div class="line">MIGU2.0--&gt;Client:返回结果</div></pre></td></tr></table></figure></p>
+<p>####2.2.3 内部实现逻辑（流程图）<br>略</p>
+<p>####2.2.4 接口设计<br>Req:<br>|参数名称|说明|是否必须|备注|<br>|–|–|–|–|<br>|columnId|电台栏目id|是|必须是电台栏目id|<br>Rep:<br>|参数名称|说明|是否必须|备注|<br>|–|–|–|–|<br>|code|返回码|是|000000|<br>|info|返回描述|是|成功|<br>|columnInfo|ColumnInfo|是|栏目|<br>返回的样子跟现在querycontentbyid返回的样子一模一样。</p>
+<p>####2.2.5 表结构设计<br>无</p>
+<p>####2.2.6 测试要点<br>1.对应场景的id传错了<br>2.对应场景的歌曲少于50首<br>3.对应场景的歌曲多于50首</p>
+<p>####2.2.7 性能测试<br>无</p>
+<p>##3. 修订记录<br>|日期|修订版本|修改描述|作者|<br>|–|–|–|–|<br>|20170524|v1.0|初稿完成|王晟|</p>
+<p>##4.常量描述<br>测试环境</p>
+<table>
+<thead>
+<tr>
+<th>Tagid</th>
+<th>Tag描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>15295581</td>
+<td>下雨</td>
+</tr>
+<tr>
+<td>15295739</td>
+<td>大风</td>
+</tr>
+<tr>
+<td>15295659</td>
+<td>阴天</td>
+</tr>
+<tr>
+<td>15295759</td>
+<td>雾</td>
+</tr>
+<tr>
+<td>15295558</td>
+<td>晴天</td>
+</tr>
+<tr>
+<td>15295721</td>
+<td>下雪</td>
+</tr>
+</tbody>
+</table>
+<p>生产环境</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/06/16/test2/" data-id="cj3z9bkuv000194d4c2x3sufb" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-场景电台需求规格说明书[SRS]" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/06/16/场景电台需求规格说明书[SRS]/" class="article-date">
@@ -170,7 +286,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/06/16/场景电台需求规格说明书[SRS]/" data-id="cj3z8yvvv0001qsd4i0ccbn2q" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/06/16/场景电台需求规格说明书[SRS]/" data-id="cj3z9bkuw000294d4h6ldyfb4" class="article-share-link">Share</a>
       
       
     </footer>
@@ -206,7 +322,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/06/16/第一篇文章/" data-id="cj3z8yvvx0002qsd4r7ucvd6b" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/06/16/第一篇文章/" data-id="cj3z9bkuy000394d4uhy2r0h0" class="article-share-link">Share</a>
       
       
     </footer>
@@ -251,7 +367,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/06/14/hello-world/" data-id="cj3z8yvvq0000qsd4x1fsih56" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/06/14/hello-world/" data-id="cj3z9bkuq000094d44olm97yl" class="article-share-link">Share</a>
       
       
     </footer>
@@ -289,6 +405,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2017/06/16/test2/">test2</a>
+          </li>
         
           <li>
             <a href="/2017/06/16/场景电台需求规格说明书[SRS]/">场景电台需求规格说明书</a>
